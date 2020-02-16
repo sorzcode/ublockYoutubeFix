@@ -13,7 +13,6 @@
 // ==/UserScript==
 (function() {
     'use strict';
-    console.log('full-refresh page', window.location.href);
 
     // Your code here...
     var check = function() {
@@ -35,6 +34,47 @@
             console.log('nothing weird happened', new Date());
         }
     }
+
+    function noRefreshCheckInject() {
+        // Select the node that will be observed for mutations
+        const targetNode = document.getElementsByClassName('video-stream html5-main-video')[0];
+
+        // Options for the observer (which mutations to observe)
+        const config = {
+            attributes: true
+        };
+
+        // Callback function to execute when mutations are observed
+        const callback = function(mutationsList, observer) {
+            // Use traditional 'for loops' for IE 11
+            for (let mutation of mutationsList) {
+                if (mutation.attributeName === 'src') {
+                    //console.log(mutation)
+                    console.log('no-refresh page', window.location.href);
+                    check();
+                }
+            }
+        };
+
+        // Create an observer instance linked to the callback function
+        const observer = new MutationObserver(callback);
+
+        // Start observing the target node for configured mutations
+        observer.observe(targetNode, config);
+    }
+
+    function fullRefreshCheck() {
+        $(document).on('DOMNodeInserted', 'ytd-player', function(e) {
+            console.log('full-refresh page', window.location.href);
+            check();
+            noRefreshCheckInject();
+            $(document).off('DOMNodeInserted', 'ytd-player');
+        });
+    }
+
+    fullRefreshCheck();
+
+})();    }
 
     function noRefreshCheckInject() {
         // Select the node that will be observed for mutations
